@@ -22,6 +22,7 @@ const gameboard = (() => {
     const rows = 3;
     const columns = 3;
     const board = [];
+    let remainingCells = 9;
 
     for (let i = 0; i < rows; i++) {
         board[i] = []
@@ -36,6 +37,14 @@ const gameboard = (() => {
     
     const getBoard = () => board;
 
+    const isFull = () => {
+        if (remainingCells === 0) {
+            return true
+        }
+
+        return false
+    }
+
     const readMarkerAt = (row, col) => {
         return board[row][col].getValue();
     }
@@ -43,6 +52,7 @@ const gameboard = (() => {
     const placeMarkerAt = (row, col, mark) => {
         if (board[row][col].isEmpty()) {
             board[row][col].addMarker(mark)
+            remainingCells -= 1;
             return true
         }
         
@@ -89,7 +99,7 @@ const gameboard = (() => {
         return diagonal;
     }
 
-    return { getNumberOfRows, getNumberOfColumns, getBoard, readMarkerAt, placeMarkerAt, getRow, getColumn, getLeftToRightDiagonal, getRightToLeftDiagonal }
+    return { getNumberOfRows, getNumberOfColumns, getBoard, readMarkerAt, placeMarkerAt, getRow, getColumn, getLeftToRightDiagonal, getRightToLeftDiagonal, isFull }
 })();
 
 const gameController = (() => {
@@ -99,6 +109,10 @@ const gameController = (() => {
             console.log(`Player ${player.number} placed a ${player.mark} in row ${row + 1} column ${col + 1}.\n`)
             if (checkHorizontalWin(player, row) || checkVerticalWin(player, col) || checkDiagonalWin(player, row, col)) {
                 console.log("Game Over")
+            } else {
+                if (gameboard.isFull()) {
+                    console.log("It's a tie!");
+                }
             }
         } else {
             console.log(`Invalid move! Player ${player.number} wants to place a ${player.mark} in row ${row + 1} column ${col + 1} but that cell is already full!\n`)
@@ -186,18 +200,27 @@ gameController.playTurn(2, 0, playerTwo);
 displayController.printBoard();
 gameController.playTurn(2, 1, playerOne);
 displayController.printBoard();
-gameController.playTurn(2, 2, playerOne);
+gameController.playTurn(2, 2, playerTwo);
 displayController.printBoard();
+gameController.playTurn(1, 2, playerTwo);
+displayController.printBoard();
+gameController.playTurn(1, 1, playerTwo);
+displayController.printBoard();
+gameController.playTurn(0, 2, playerTwo);
+displayController.printBoard();
+gameController.playTurn(0, 1, playerTwo);
+displayController.printBoard();
+
 
 // Vertical Win
-gameController.playTurn(1, 2, playerOne);
-displayController.printBoard();
-gameController.playTurn(0, 2, playerOne);
-displayController.printBoard();
+// gameController.playTurn(1, 2, playerOne);
+// displayController.printBoard();
+// gameController.playTurn(0, 2, playerOne);
+// displayController.printBoard();
 
 // Diagonal Win
-gameController.playTurn(1, 1, playerOne);
-displayController.printBoard();
+// gameController.playTurn(1, 1, playerOne);
+// displayController.printBoard();
 
 
 // gameController.playTurn(0, 2, playerOne);
