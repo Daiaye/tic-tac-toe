@@ -157,6 +157,24 @@ const gameController = (() => {
 })();
 
 const displayController = (() => {
+    const turnMessageDiv = document.querySelector(".turn-message");
+    const gameboardDiv = document.querySelector(".gameboard");
+
+    const updateScreen = () => {
+        gameboardDiv.textContent = "";
+
+        for (let row = 0; row < gameboard.getNumberOfRows(); row++) {
+            for (let col = 0; col < gameboard.getNumberOfColumns(); col++) {
+                const cellButton = document.createElement("button");
+                cellButton.textContent = gameboard.readMarkerAt(row, col)
+                cellButton.classList.add("cell");
+                cellButton.dataset.row = row;
+                cellButton.dataset.col = col;
+                gameboardDiv.append(cellButton)
+            }
+        }
+    }
+
     const printBoard = () => {
     const border = "-------\n";
     let boardString = "";
@@ -173,7 +191,7 @@ const displayController = (() => {
     console.log(boardString);
     }
 
-    return { printBoard }
+    return { updateScreen, printBoard }
 })();
 
 const playerOne = createPlayer(1, "X");
@@ -216,3 +234,8 @@ displayController.printBoard();
 // gameController.playTurn(0, 2, playerOne);
 // displayController.printBoard();
 // console.log(gameboard.getRightToLeftDiagonal())
+
+const restartButton = document.querySelector(".restart-button");
+restartButton.addEventListener("click", () => {
+    displayController.updateScreen();
+})

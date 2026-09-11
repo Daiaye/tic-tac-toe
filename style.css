@@ -80,14 +80,8 @@ body {
   aspect-ratio: 1;
 }
 
-.gameboard div {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+.gameboard button {
   font-size: 2rem;
-  border: 1px solid black;
-  aspect-ratio: 1;
 }
 
 div .restart-button {
