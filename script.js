@@ -37,13 +37,7 @@ const gameboard = (() => {
     
     const getBoard = () => board;
 
-    const isFull = () => {
-        if (remainingCells === 0) {
-            return true
-        }
-
-        return false
-    }
+    const isFull = () => remainingCells === 0
 
     const readMarkerAt = (row, col) => {
         return board[row][col].getValue();
@@ -142,10 +136,6 @@ const gameController = (() => {
     }
 
     const checkDiagonalWin = (player, row, col) => {
-        const invalid = ["0,1", "1,0", "1,2", "2,1"];
-        const isInvalid = invalid.includes(`${row},${col}`);
-        if (isInvalid) return false
-
         if (row === col) {
             const diagonalToCheck = gameboard.getLeftToRightDiagonal()
             const result = checkForWin(player, diagonalToCheck, "diagonal");
