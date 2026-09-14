@@ -53,38 +53,86 @@ h1, h2, h3, h4, h5, h6 {
   isolation: isolate;
 }
 
+:root {
+  --paper: #f7f5f0;
+  --ink: #23211d;
+  --ink-soft: #6b6862;
+  --line: #23211d;
+  --accent: #35533f;
+}
+
 body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  gap: 1.75rem;
   padding: 1rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Iowan Old Style, Palatino Linotype, Palatino, Georgia, serif;
 }
 
-.header {
+.header h1 {
   text-align: center;
-  font-size: 2rem;
+  font-size: 2.5rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .message {
-  font-size: 2rem;
+  font-size: 1.25rem;
+  color: var(--ink-soft);
+  min-height: 1.5em;
 }
 
 .gameboard {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  padding: 1.5rem;
   width: 60vmin;
+  max-width: 320px;
   aspect-ratio: 1;
+  background: var(--line);
+  gap: 2px;
+  border: 2px solid var(--line);
 }
 
 .gameboard button {
-  font-size: 2rem;
+  font-size: 2.5rem;
   aspect-ratio: 1;
+  background: var(--paper);
+  border: none;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
-div .restart-button {
-  font-size: 2rem;
+.gameboard button:hover {
+  background: #ece8df;
+}
+
+.gameboard button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.restart-button {
+  font-size: 1rem;
+  padding: 0.6em 1.4em;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.restart-button:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.restart-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
