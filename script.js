@@ -1,6 +1,3 @@
-// TODO: Fix bug where marked cell is no longer playable
-// TODO: Implement game end
-
 function createPlayer(number, mark) {
     const getNumber = () => number;
     
@@ -117,8 +114,13 @@ const gameController = (() => {
     const playerO = createPlayer(2, "O");
     let activePlayer = playerX;
     let isGameOver = false;
+    let winner = null;
 
     const playTurn = (row, col) => {
+        if (isGameOver) {
+            return false
+        }
+
         const validMove = gameboard.placeMarkerAt(row, col, activePlayer.getMark())
 
         if (!validMove) {
@@ -127,11 +129,13 @@ const gameController = (() => {
 
         if (checkForWin(row, col)) {
             isGameOver = true;
+            winner = activePlayer;
             return true
         }
 
         if (gameboard.isFull()){
             isGameOver = true;
+            winner = null;
             return true;
         }
 
@@ -140,6 +144,10 @@ const gameController = (() => {
     }
 
     const getActivePlayer = () => activePlayer;
+
+    const getIsGameOver = () => isGameOver;
+
+    const getWinner = () => winner;
 
     const switchActivePlayer = () => {
         if (activePlayer === playerX) {
@@ -172,15 +180,16 @@ const gameController = (() => {
         gameboard.resetGameboard();
         isGameOver = false;
         activePlayer = playerX;
+        winner = null;
     }
 
-    return { playTurn, getActivePlayer, switchActivePlayer, resetGame }
+    return { playTurn, getActivePlayer, switchActivePlayer, resetGame, getIsGameOver, getWinner }
 
     
 })();
 
 const displayController = (() => {
-    const turnMessageDiv = document.querySelector(".turn-message");
+    const messageDiv = document.querySelector(".message");
     const gameboardDiv = document.querySelector(".gameboard");
 
     const updateScreen = () => {
@@ -196,6 +205,22 @@ const displayController = (() => {
                 gameboardDiv.append(cellButton)
             }
         }
+
+        if (gameController.getIsGameOver()) {
+            const winner = gameController.getWinner();
+            if (winner) {
+                setMessage(`Player ${winner.getMark()} wins!`)
+            } else {
+                setMessage("It's a tie!")
+            }
+        } else {
+            const activePlayer = gameController.getActivePlayer();
+            setMessage(`Player ${activePlayer.getMark()}'s turn`);
+        }
+    }
+
+    const setMessage = (message) => {
+        messageDiv.textContent = message;
     }
 
     const printBoard = () => {
@@ -216,10 +241,9 @@ const displayController = (() => {
 
     const clickHandlerGameboard = (e) => {
         const targetCell = e.target;
-        const currentPlayer = gameController.getActivePlayer()
-        const validMove = gameController.playTurn(targetCell.dataset.row, targetCell.dataset.col);
+        const validMove = gameController.playTurn(Number(targetCell.dataset.row), Number(targetCell.dataset.col));
         if (validMove) {
-            targetCell.textContent = currentPlayer.getMark();
+            updateScreen();
         }
     }
 

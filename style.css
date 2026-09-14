@@ -68,13 +68,13 @@ body {
   font-size: 2rem;
 }
 
-.turn-message {
+.message {
   font-size: 2rem;
 }
 
 .gameboard {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: 1fr 1fr 1fr;
   padding: 1.5rem;
   width: 60vmin;
   aspect-ratio: 1;
