@@ -191,6 +191,7 @@ const gameController = (() => {
 const displayController = (() => {
     const messageDiv = document.querySelector(".message");
     const gameboardDiv = document.querySelector(".gameboard");
+    const restartButton = document.querySelector(".restart-button");
 
     const updateScreen = () => {
         gameboardDiv.textContent = "";
@@ -247,13 +248,16 @@ const displayController = (() => {
         }
     }
 
+    const clickHandlerRestart = () => {
+        gameController.resetGame();
+        updateScreen();
+    }
+
     gameboardDiv.addEventListener("click", clickHandlerGameboard);
+    restartButton.addEventListener("click", clickHandlerRestart);
+
 
     return { updateScreen, printBoard }
 })();
 
-const restartButton = document.querySelector(".restart-button");
-restartButton.addEventListener("click", () => {
-    gameController.resetGame();
-    displayController.updateScreen();
-})
+displayController.updateScreen();
