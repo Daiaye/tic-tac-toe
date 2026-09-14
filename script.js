@@ -1,5 +1,12 @@
+// TODO: Fix bug where marked cell is no longer playable
+// TODO: Implement game end
+
 function createPlayer(number, mark) {
-    return { number, mark }
+    const getNumber = () => number;
+    
+    const getMark = () => mark;
+    
+    return { getNumber, getMark }
 }
 
 function cell() {
@@ -93,30 +100,55 @@ const gameboard = (() => {
         return diagonal;
     }
 
-    return { getNumberOfRows, getNumberOfColumns, getBoard, readMarkerAt, placeMarkerAt, getRow, getColumn, getLeftToRightDiagonal, getRightToLeftDiagonal, isFull }
+    const resetGameboard = () => {
+        for (let i = 0; i < rows; i++) {
+            board[i] = []
+            for (let j = 0; j < columns; j++) {
+                board[i][j] = cell();
+            }
+        }
+    }
+
+    return { getNumberOfRows, getNumberOfColumns, getBoard, readMarkerAt, placeMarkerAt, getRow, getColumn, getLeftToRightDiagonal, getRightToLeftDiagonal, isFull, resetGameboard }
 })();
 
 const gameController = (() => {
+    const playerX = createPlayer(1, "X");
+    const playerO = createPlayer(2, "O");
+    let activePlayer = playerX;
+
     const playTurn = (row, col, player) => {
-        const validMove = gameboard.placeMarkerAt(row, col, player.mark)
+        const validMove = gameboard.placeMarkerAt(row, col, player.getMark())
+        console.log(activePlayer.getMark());
         if (validMove) {
-            console.log(`Player ${player.number} placed a ${player.mark} in row ${row + 1} column ${col + 1}.\n`)
             if (checkHorizontalWin(player, row) || checkVerticalWin(player, col) || checkDiagonalWin(player, row, col)) {
                 console.log("Game Over")
             } else {
                 if (gameboard.isFull()) {
                     console.log("It's a tie!");
+                } else {
+                    switchActivePlayer();
                 }
             }
         } else {
-            console.log(`Invalid move! Player ${player.number} wants to place a ${player.mark} in row ${row + 1} column ${col + 1} but that cell is already full!\n`)
+            console.log(`Invalid move! Player ${player.getNumber()} wants to place a ${player.getMark()} in row ${Number(row) + 1} column ${Number(col) + 1} but that cell is already full!\n`)
+        }
+    }
+
+    const getActivePlayer = () => activePlayer;
+
+    const switchActivePlayer = () => {
+        if (activePlayer === playerX) {
+            activePlayer = playerO;
+        } else {
+            activePlayer = playerX;
         }
     }
 
     const checkForWin = (player, line, direction) => {
-        const win = line.every(mark => mark === player.mark);
+        const win = line.every(mark => mark === player.getMark());
         if (win) {
-            console.log(`Player ${player.number} wins with a ${direction} win!`)
+            console.log(`Player ${player.getNumber()} wins with a ${direction} win!`)
             return true
         }
 
@@ -151,7 +183,7 @@ const gameController = (() => {
         return false
     }
 
-    return { playTurn }
+    return { playTurn, getActivePlayer, switchActivePlayer }
 
     
 })();
@@ -191,33 +223,44 @@ const displayController = (() => {
     console.log(boardString);
     }
 
+    const clickHandlerGameboard = (e) => {
+        const targetCell = e.target;
+        const currentPlayer = gameController.getActivePlayer()
+        gameController.playTurn(targetCell.dataset.row, targetCell.dataset.col, currentPlayer);
+        targetCell.textContent = currentPlayer.getMark();
+        console.log(`Row ${e.target.dataset.row} Column ${e.target.dataset.col} was clicked`);
+    }
+
+    gameboardDiv.addEventListener("click", clickHandlerGameboard);
+
     return { updateScreen, printBoard }
 })();
 
-const playerOne = createPlayer(1, "X");
-const playerTwo = createPlayer(2, "O");
 
-displayController.printBoard();
-gameController.playTurn(2, 0, playerOne);
-displayController.printBoard();
-gameController.playTurn(1, 0, playerTwo);
-displayController.printBoard();
-gameController.playTurn(0, 0, playerOne);
-displayController.printBoard();
-gameController.playTurn(2, 0, playerTwo);
-displayController.printBoard();
-gameController.playTurn(2, 1, playerOne);
-displayController.printBoard();
-gameController.playTurn(2, 2, playerTwo);
-displayController.printBoard();
-gameController.playTurn(1, 2, playerTwo);
-displayController.printBoard();
-gameController.playTurn(1, 1, playerTwo);
-displayController.printBoard();
-gameController.playTurn(0, 2, playerTwo);
-displayController.printBoard();
-gameController.playTurn(0, 1, playerTwo);
-displayController.printBoard();
+// const playerOne = createPlayer(1, "X");
+// const playerTwo = createPlayer(2, "O");
+
+// displayController.printBoard();
+// gameController.playTurn(2, 0, playerOne);
+// displayController.printBoard();
+// gameController.playTurn(1, 0, playerTwo);
+// displayController.printBoard();
+// gameController.playTurn(0, 0, playerOne);
+// displayController.printBoard();
+// gameController.playTurn(2, 0, playerTwo);
+// displayController.printBoard();
+// gameController.playTurn(2, 1, playerOne);
+// displayController.printBoard();
+// gameController.playTurn(2, 2, playerTwo);
+// displayController.printBoard();
+// gameController.playTurn(1, 2, playerTwo);
+// displayController.printBoard();
+// gameController.playTurn(1, 1, playerTwo);
+// displayController.printBoard();
+// gameController.playTurn(0, 2, playerTwo);
+// displayController.printBoard();
+// gameController.playTurn(0, 1, playerTwo);
+// displayController.printBoard();
 
 
 // Vertical Win
@@ -238,4 +281,5 @@ displayController.printBoard();
 const restartButton = document.querySelector(".restart-button");
 restartButton.addEventListener("click", () => {
     displayController.updateScreen();
+    gameboard.resetGameboard(); 
 })
