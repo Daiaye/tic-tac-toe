@@ -101,8 +101,8 @@ const gameboard = (() => {
     }
 
     const resetGameboard = () => {
+        remainingCells = 9;
         for (let i = 0; i < rows; i++) {
-            board[i] = []
             for (let j = 0; j < columns; j++) {
                 board[i][j] = cell();
             }
@@ -116,23 +116,27 @@ const gameController = (() => {
     const playerX = createPlayer(1, "X");
     const playerO = createPlayer(2, "O");
     let activePlayer = playerX;
+    let isGameOver = false;
 
-    const playTurn = (row, col, player) => {
-        const validMove = gameboard.placeMarkerAt(row, col, player.getMark())
-        console.log(activePlayer.getMark());
-        if (validMove) {
-            if (checkHorizontalWin(player, row) || checkVerticalWin(player, col) || checkDiagonalWin(player, row, col)) {
-                console.log("Game Over")
-            } else {
-                if (gameboard.isFull()) {
-                    console.log("It's a tie!");
-                } else {
-                    switchActivePlayer();
-                }
-            }
-        } else {
-            console.log(`Invalid move! Player ${player.getNumber()} wants to place a ${player.getMark()} in row ${Number(row) + 1} column ${Number(col) + 1} but that cell is already full!\n`)
+    const playTurn = (row, col) => {
+        const validMove = gameboard.placeMarkerAt(row, col, activePlayer.getMark())
+
+        if (!validMove) {
+            return false
         }
+
+        if (checkForWin(row, col)) {
+            isGameOver = true;
+            return true
+        }
+
+        if (gameboard.isFull()){
+            isGameOver = true;
+            return true;
+        }
+
+        switchActivePlayer();
+        return true;
     }
 
     const getActivePlayer = () => activePlayer;
@@ -145,45 +149,32 @@ const gameController = (() => {
         }
     }
 
-    const checkForWin = (player, line, direction) => {
-        const win = line.every(mark => mark === player.getMark());
-        if (win) {
-            console.log(`Player ${player.getNumber()} wins with a ${direction} win!`)
-            return true
-        }
+    const checkForWin = (row, col) => {
+        const linesToCheck = [
+            gameboard.getRow(row),
+            gameboard.getColumn(col)
+        ];
 
-        return false
-    }
-
-    const checkHorizontalWin = (player, row) => {
-        const rowToCheck = gameboard.getRow(row);
-        const result = checkForWin(player, rowToCheck, "horizontal");
-        return result
-    }
-
-    const checkVerticalWin = (player, col) => {
-        const colToCheck = gameboard.getColumn(col);
-        const result = checkForWin(player, colToCheck, "vertical");
-        return result
-    }
-
-    const checkDiagonalWin = (player, row, col) => {
         if (row === col) {
-            const diagonalToCheck = gameboard.getLeftToRightDiagonal()
-            const result = checkForWin(player, diagonalToCheck, "diagonal");
-            if (result) return result;
+            linesToCheck.push(gameboard.getLeftToRightDiagonal());
         }
 
         if (row + col === gameboard.getNumberOfRows() - 1) {
-            const diagonalToCheck = gameboard.getRightToLeftDiagonal()
-            const result = checkForWin(player, diagonalToCheck, "diagonal");
-            if (result) return result
+            linesToCheck.push(gameboard.getRightToLeftDiagonal())
         }
 
-        return false
+        return linesToCheck.some(line => 
+            line.every(mark => mark === activePlayer.getMark())
+        )
     }
 
-    return { playTurn, getActivePlayer, switchActivePlayer }
+    const resetGame = () => {
+        gameboard.resetGameboard();
+        isGameOver = false;
+        activePlayer = playerX;
+    }
+
+    return { playTurn, getActivePlayer, switchActivePlayer, resetGame }
 
     
 })();
@@ -226,9 +217,10 @@ const displayController = (() => {
     const clickHandlerGameboard = (e) => {
         const targetCell = e.target;
         const currentPlayer = gameController.getActivePlayer()
-        gameController.playTurn(targetCell.dataset.row, targetCell.dataset.col, currentPlayer);
-        targetCell.textContent = currentPlayer.getMark();
-        console.log(`Row ${e.target.dataset.row} Column ${e.target.dataset.col} was clicked`);
+        const validMove = gameController.playTurn(targetCell.dataset.row, targetCell.dataset.col);
+        if (validMove) {
+            targetCell.textContent = currentPlayer.getMark();
+        }
     }
 
     gameboardDiv.addEventListener("click", clickHandlerGameboard);
@@ -236,50 +228,8 @@ const displayController = (() => {
     return { updateScreen, printBoard }
 })();
 
-
-// const playerOne = createPlayer(1, "X");
-// const playerTwo = createPlayer(2, "O");
-
-// displayController.printBoard();
-// gameController.playTurn(2, 0, playerOne);
-// displayController.printBoard();
-// gameController.playTurn(1, 0, playerTwo);
-// displayController.printBoard();
-// gameController.playTurn(0, 0, playerOne);
-// displayController.printBoard();
-// gameController.playTurn(2, 0, playerTwo);
-// displayController.printBoard();
-// gameController.playTurn(2, 1, playerOne);
-// displayController.printBoard();
-// gameController.playTurn(2, 2, playerTwo);
-// displayController.printBoard();
-// gameController.playTurn(1, 2, playerTwo);
-// displayController.printBoard();
-// gameController.playTurn(1, 1, playerTwo);
-// displayController.printBoard();
-// gameController.playTurn(0, 2, playerTwo);
-// displayController.printBoard();
-// gameController.playTurn(0, 1, playerTwo);
-// displayController.printBoard();
-
-
-// Vertical Win
-// gameController.playTurn(1, 2, playerOne);
-// displayController.printBoard();
-// gameController.playTurn(0, 2, playerOne);
-// displayController.printBoard();
-
-// Diagonal Win
-// gameController.playTurn(1, 1, playerOne);
-// displayController.printBoard();
-
-
-// gameController.playTurn(0, 2, playerOne);
-// displayController.printBoard();
-// console.log(gameboard.getRightToLeftDiagonal())
-
 const restartButton = document.querySelector(".restart-button");
 restartButton.addEventListener("click", () => {
+    gameController.resetGame();
     displayController.updateScreen();
-    gameboard.resetGameboard(); 
 })
